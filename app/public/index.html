@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue-Green Deployment Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.5s ease;
+            color: #ffffff;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+        }
+        .container {
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .details {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        /* Default loading background */
+        body.loading {
+            background-color: #333333;
+        }
+        /* Dynamic backgrounds */
+        body.blue { background-color: #3498db; }
+        body.green { background-color: #2ecc71; }
+    </style>
+</head>
+<body class="loading" id="body">
+    <div class="container">
+        <h1>Blue-Green Deployment</h1>
+        <h2>Current Version: <span id="version-display">Loading...</span></h2>
+        
+        <div class="details">
+            <p><strong>Served by Pod:</strong> <span id="pod-display">-</span></p>
+            <p><strong>Auto Refresh:</strong> Every 2 seconds</p>
+        </div>
+    </div>
+
+    <script>
+        function checkVersion() {
+            fetch('/api/info')
+                .then(response => response.json())
+                .then(data => {
+                    const body = document.getElementById('body');
+                    const versionDisplay = document.getElementById('version-display');
+                    const podDisplay = document.getElementById('pod-display');
+                    
+                    // Update classes for styling
+                    if (data.version.toLowerCase() === 'blue') {
+                        body.className = 'blue';
+                        versionDisplay.innerText = 'v1.0 (BLUE)';
+                    } else if (data.version.toLowerCase() === 'green') {
+                        body.className = 'green';
+                        versionDisplay.innerText = 'v2.0 (GREEN)';
+                    } else {
+                        versionDisplay.innerText = data.version;
+                    }
+                    
+                    podDisplay.innerText = data.pod;
+                })
+                .catch(err => console.error('Error fetching info:', err));
+        }
+
+        // Check immediately, then every 2 seconds
+        checkVersion();
+        setInterval(checkVersion, 2000);
+    </script>
+</body>
+</html>

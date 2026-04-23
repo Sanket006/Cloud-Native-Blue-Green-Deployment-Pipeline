@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-green
+  labels:
+    app: demo-app
+    version: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-app
+      version: green
+  template:
+    metadata:
+      labels:
+        app: demo-app
+        version: green
+    spec:
+      containers:
+      - name: demo-app
+        image: devops-demo/bg-app:green
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+        - name: APP_VERSION
+          value: "green"
