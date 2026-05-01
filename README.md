@@ -24,7 +24,7 @@ Blue-Green deployment reduces downtime and release risk by running two identical
 ## Project Architecture
 
 ```
-blue-green-devops/
+cloud-native-blue-green-deployment-pipeline/
 ├── app/                        # Node.js demo application
 │   ├── Dockerfile              # Multi-stage-friendly Node 18 Alpine image
 │   ├── package.json            # Express dependency
