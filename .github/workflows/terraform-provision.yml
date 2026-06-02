@@ -1,0 +1,89 @@
+name: AWS Infrastructure — Terraform Provisioning
+
+# This workflow allows operators to provision or destroy AWS infrastructure manually.
+# Using 'workflow_dispatch' (manual trigger) prevents accidental resource creation,
+# avoiding unexpected AWS charges or resource leaks.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform Action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+
+# Limit permissions to read-only for security best practices
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform Provisioning Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout repository code
+        uses: actions/checkout@v4
+        with:
+          # Simple check to guarantee code is checked out successfully
+          persist-credentials: false
+
+      - name: 2. Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+        # Set continue-on-error to true so the job can output friendly setup instructions 
+        # instead of failing blindly if credentials are not configured yet.
+        continue-on-error: true
+
+      - name: 3. Set up Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: 4. Check credentials & Run Terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          ACTION: ${{ github.event.inputs.action }}
+        run: |
+          # Verify that AWS credentials exist in secrets
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "========================================================================="
+            echo "⚠️  TERRAFORM GATED — AWS secrets are missing in repository settings!"
+            echo ""
+            echo "    To configure your secrets and activate this pipeline:"
+            echo "      1. Go to repository Settings -> Secrets and variables -> Actions."
+            echo "      2. Create 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' secrets."
+            echo "      3. Return to the Actions tab and rerun this workflow manually."
+            echo "========================================================================="
+            exit 1
+          fi
+
+          echo "🎬 Starting Terraform provisioning process inside 'terraform/' directory..."
+          cd terraform
+
+          # ── STEP A: Initialize working directory ─────────────────────────────
+          echo "❇️  Running 'terraform init'..."
+          terraform init
+
+          # ── STEP B: Select Action (Apply or Destroy) ─────────────────────────
+          if [ "$ACTION" = "apply" ]; then
+            echo "❇️  Running 'terraform plan' to dry-run changes..."
+            terraform plan
+            
+            echo "🚀 Running 'terraform apply' to deploy EKS, ECR, and VPC..."
+            terraform apply -auto-approve
+            
+          elif [ "$ACTION" = "destroy" ]; then
+            echo "🔥 Running 'terraform destroy' to teardown AWS resources..."
+            terraform destroy -auto-approve
+            
+          else
+            echo "Error: Unknown action: $ACTION"
+            exit 1
+          fi
