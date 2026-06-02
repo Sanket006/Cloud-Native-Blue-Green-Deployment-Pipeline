@@ -17,6 +17,10 @@ on:
       - '.github/workflows/ci.yml'
   workflow_dispatch:
 
+# Limit GITHUB_TOKEN permissions to read-only for security best practices
+permissions:
+  contents: read
+
 jobs:
   # 1. Lint Code & Shell Scripts
   lint:
@@ -41,7 +45,7 @@ jobs:
           node --check app/server.js
 
       - name: Lint Shell Scripts
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@2.0.0
         with:
           severity: error
           scandir: ./scripts
@@ -86,4 +90,5 @@ jobs:
           file: ./app/Dockerfile
           push: false
           tags: devops-demo/bg-app:green
+
 
