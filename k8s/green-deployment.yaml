@@ -26,3 +26,28 @@ spec:
         env:
         - name: APP_VERSION
           value: "green"
+
+        # Resource limits prevent this pod from consuming all node resources
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+
+        # Readiness probe: only send traffic once the app responds on /api/info
+        readinessProbe:
+          httpGet:
+            path: /api/info
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 5
+
+        # Liveness probe: restart the pod if it stops responding
+        livenessProbe:
+          httpGet:
+            path: /api/info
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10

@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "terraform_state" {
   bucket = "bg-devops-tf-state-${random_id.bucket_suffix.hex}"
 
   lifecycle {
-    prevent_destroy = false # Set to true in a real production environment
+    prevent_destroy = true  # Protects Terraform state from accidental deletion. Set to false only when intentionally tearing down.
   }
 }
 

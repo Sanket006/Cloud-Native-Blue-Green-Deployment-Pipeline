@@ -128,9 +128,10 @@ chmod +x scripts/switch-traffic.sh
 
 > ⚠️ **EKS clusters + NAT Gateways cost money even when idle.** Always destroy when done.
 
-Before destroying with Terraform, delete Kubernetes resources that may have provisioned AWS load balancers (otherwise Terraform destroy will hang):
+Before destroying with Terraform, **you must delete Kubernetes resources first**. If you used `type: LoadBalancer`, Kubernetes provisioned an AWS Elastic Load Balancer that is **not tracked by Terraform**. If it still exists when you run `terraform destroy`, Terraform will fail trying to delete the VPC because the ELB is still attached to it.
 
 ```bash
+# Delete K8s resources first — this also triggers AWS to de-provision any ELB
 kubectl delete svc bg-demo-service
 kubectl delete deployment app-blue app-green
 ```
@@ -146,7 +147,7 @@ terraform destroy   # type 'yes' to confirm
 
 ## Automating with Jenkins CI/CD
 
-Use `Jenkinsfile-aws.jenkinsfile` for a fully automated pipeline:
+Use `aws.Jenkinsfile` for a fully automated pipeline:
 
 | Stage | Triggered when ACTION = |
 |-------|------------------------|

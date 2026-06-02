@@ -58,7 +58,8 @@ cloud-native-blue-green-deployment-pipeline/
 │       └── blue-green-cd.yml   # GitHub Actions: manual traffic switch trigger
 │
 ├── Jenkinsfile                 # Jenkins pipeline: local deploy + traffic switch
-├── Jenkinsfile-aws.jenkinsfile # Jenkins pipeline: Terraform + AWS deploy + switch
+├── aws.Jenkinsfile             # Jenkins pipeline: Terraform + AWS deploy + switch
+├── kind-config.yaml            # Kind cluster definition (2 workers + NodePort mapping)
 ├── AWS-SETUP.md                # Step-by-step guide for the full AWS/EKS path
 └── README.md                   # This file
 ```
@@ -107,8 +108,8 @@ Choose one of the following:
 # OR Minikube:
 minikube start
 
-# OR Kind:
-kind create cluster
+# OR Kind — use the provided config file (sets up 2 workers + NodePort mapping):
+kind create cluster --name mycluster --config kind-config.yaml
 ```
 
 ### Step 3: Deploy Blue and Green Environments
@@ -139,7 +140,9 @@ Open your browser: **http://localhost:8080**
 
 You will see a **blue** background with `v1.0 (BLUE)`. The page auto-refreshes every **2 seconds** and shows which pod is serving the request.
 
-> Alternatively, on a local cluster configured with NodePort access, use port **30080** on the node IP.
+> **Tip — skip port-forward with kind:** If you created the cluster using `kind-config.yaml`, NodePort `30080` is already mapped to your machine. Open **http://localhost:30080** directly — no `port-forward` command needed.
+
+> **Note for `switch-traffic.sh` users:** After switching traffic, the old `port-forward` stays pinned to its original pod. Run the command printed by `switch-traffic.sh` in a new terminal to reconnect to the correct pod.
 
 ### Step 5: Switch Traffic — Zero Downtime!
 
@@ -207,7 +210,7 @@ A parameterized pipeline with two actions:
 
 **Setup:** Point a Jenkins Pipeline job at this repo and set the `Script Path` to `Jenkinsfile`.
 
-### Jenkins — AWS (`Jenkinsfile-aws.jenkinsfile`)
+### Jenkins — AWS (`aws.Jenkinsfile`)
 
 A full end-to-end AWS pipeline with four stages:
 
@@ -238,7 +241,7 @@ A manually-triggered (`workflow_dispatch`) workflow that performs traffic switch
 | Kubernetes Deployments & Services | `k8s/` |
 | Infrastructure as Code | `terraform/` |
 | Remote Terraform state | `terraform/bootstrap-backend/` + `provider.tf` |
-| Jenkins parameterized pipelines | `Jenkinsfile`, `Jenkinsfile-aws.jenkinsfile` |
+| Jenkins parameterized pipelines | `Jenkinsfile`, `aws.Jenkinsfile` |
 | GitHub Actions CD | `.github/workflows/blue-green-cd.yml` |
 
 ---

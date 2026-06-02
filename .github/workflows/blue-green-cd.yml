@@ -1,10 +1,15 @@
 name: CD — Blue-Green Traffic Switch
 
 # Manually triggered via the GitHub Actions UI.
-# To use this against a real cluster:
-#   1. Add your kubeconfig as a repository secret named: KUBECONFIG
-#   2. Uncomment the "Set up Kubeconfig" step below.
-#   3. Uncomment the kubectl patch command in the "Switch Traffic" step.
+#
+# HOW TO ACTIVATE against a real cluster:
+#   1. Go to your repo → Settings → Secrets and variables → Actions.
+#   2. Add a secret named KUBECONFIG containing your kubeconfig file contents.
+#      (Run: cat ~/.kube/config | base64  — or use the raw YAML for EKS)
+#   3. Uncomment the "Set up Kubeconfig" step below.
+#   4. Uncomment the kubectl patch command in the "Switch Traffic" step.
+#
+# Until activated, this workflow runs in DRY RUN mode and makes no changes.
 
 on:
   workflow_dispatch:
@@ -26,13 +31,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Pin to a specific kubectl version for reproducible, predictable runs.
+      # Update this version intentionally when you want to upgrade.
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
+          version: 'v1.30.0'
 
-      # Uncomment this step and configure the KUBECONFIG secret in your repo settings.
-      # For AWS EKS, you can also use the aws-actions/amazon-eks-credentials action.
+      # Uncomment this step once the KUBECONFIG secret is configured (see instructions above).
       # - name: Set up Kubeconfig
       #   run: |
       #     mkdir -p $HOME/.kube
@@ -44,8 +50,14 @@ jobs:
           TARGET_ENV: ${{ github.event.inputs.target_env }}
         run: |
           echo "Requested traffic switch to: $TARGET_ENV"
-          # Uncomment the line below once kubeconfig is configured:
+          echo ""
+          echo "⚠️  DRY RUN — no changes have been made to the cluster."
+          echo "    The kubectl patch command below is commented out."
+          echo "    To activate: add a KUBECONFIG secret and uncomment the steps above."
+          echo ""
+          echo "    Command that would run:"
+          echo "    kubectl patch service bg-demo-service \\"
+          echo "      -p '{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}'"
+          # Uncomment the lines below once the kubeconfig is configured:
           # kubectl patch service bg-demo-service \
           #   -p "{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}"
-          echo "--- DRY RUN: kubectl patch is commented out until KUBECONFIG secret is configured ---"
-          echo "See README.md → GitHub Actions section for setup instructions."
