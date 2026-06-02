@@ -91,4 +91,55 @@ jobs:
           push: false
           tags: devops-demo/bg-app:green
 
+  # 4. Continuous Deployment (CD) — Gated Deployment to AWS EKS
+  deploy-aws:
+    name: Continuous Deployment (AWS EKS)
+    needs: [lint, k8s-validate, docker-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+        continue-on-error: true # Allow it to fail gracefully if secrets are not set
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.30.0'
+
+      - name: Check AWS Credentials & Trigger CD
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "========================================================================="
+            echo "⚠️  CD GATED — AWS secrets are not configured in this repository."
+            echo "    All CI verification steps (Lint, Kube-Linter, Docker build) PASSED!"
+            echo "    The codebase is healthy and verified."
+            echo ""
+            echo "    To activate automated CD to AWS EKS:"
+            echo "      1. Go to repository Settings -> Secrets and variables -> Actions."
+            echo "      2. Define AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY."
+            echo "      3. Push a commit to the 'main' branch."
+            echo "========================================================================="
+            exit 0
+          fi
+
+          echo "🚀 Secrets detected. Initializing AWS EKS Continuous Deployment..."
+          chmod +x scripts/deploy-aws.sh
+          ./scripts/deploy-aws.sh
+
+
 
