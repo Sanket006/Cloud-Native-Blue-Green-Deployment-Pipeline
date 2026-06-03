@@ -178,7 +178,8 @@ Use `aws.Jenkinsfile` for a fully automated pipeline:
 
 | Document | Type | Priority | Description |
 | :--- | :--- | :--- | :--- |
-| 📄 **[README.md](README.md)** | Core Overview | **Critical** | Main project entry point, local quick start, and architectural overview. |
+| 📄 **[README.md](../README.md)** | Repository Landing | **Critical** | Root project overview, architecture blueprint, and navigation index. |
+| 📄 **[local.md](local.md)** | Local Sandbox | **High** | Walkthrough for starting a local cluster (Kind/Minikube) and running local deployments. |
 | 📄 **[AWS-SETUP.md](AWS-SETUP.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
 | 📄 **[CICD-GUIDE.md](CICD-GUIDE.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
 

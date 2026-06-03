@@ -128,7 +128,7 @@ Each job runs on its **own isolated runner** (a fresh virtual machine). Jobs can
 
 ### 3.2 Workflow 1 — CI Build & Lint (`ci.yml`)
 
-**File:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+**File:** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 
 **Triggers:** Push or Pull Request to the `main` branch touching `app/`, `k8s/`, or `scripts/`. Can also be run manually.
 
@@ -270,7 +270,7 @@ By default, the CD step runs in a **gated mode** — it prints instructions but 
 
 ### 3.3 Workflow 2 — Blue-Green Traffic Switch (`blue-green-cd.yml`)
 
-**File:** [`.github/workflows/blue-green-cd.yml`](.github/workflows/blue-green-cd.yml)
+**File:** [`.github/workflows/blue-green-cd.yml`](../.github/workflows/blue-green-cd.yml)
 
 **Trigger:** Manual only — `workflow_dispatch` with a dropdown input.
 
@@ -339,7 +339,7 @@ jobs:
 
 ### 3.4 Workflow 3 — Terraform Provisioning (`terraform-provision.yml`)
 
-**File:** [`.github/workflows/terraform-provision.yml`](.github/workflows/terraform-provision.yml)
+**File:** [`.github/workflows/terraform-provision.yml`](../.github/workflows/terraform-provision.yml)
 
 **Trigger:** Manual only — `workflow_dispatch` with `apply` or `destroy` action input.
 
@@ -569,7 +569,7 @@ Install these during the setup wizard or via **Manage Jenkins → Plugins**:
 
 ### 4.3 Pipeline 1 — Local Deploy (`Jenkinsfile`)
 
-**File:** [`Jenkinsfile`](Jenkinsfile)
+**File:** [`Jenkinsfile`](../Jenkinsfile)
 
 This pipeline targets a **local Kubernetes cluster** (Kind, Minikube, Docker Desktop). It provides two parameterized actions.
 
@@ -649,7 +649,7 @@ pipeline {
 
 ### 4.4 Pipeline 2 — AWS Full Stack (`aws.Jenkinsfile`)
 
-**File:** [`aws.Jenkinsfile`](aws.Jenkinsfile)
+**File:** [`aws.Jenkinsfile`](../aws.Jenkinsfile)
 
 This pipeline orchestrates the **entire AWS lifecycle**: provisioning infrastructure, deploying the app to EKS, switching traffic, and tearing everything down — all from Jenkins.
 
@@ -949,7 +949,7 @@ terraform init
 terraform apply -auto-approve
 ```
 
-Then update [`terraform/provider.tf`](terraform/provider.tf) with the output bucket name and re-run.
+Then update [`terraform/provider.tf`](../terraform/provider.tf) with the output bucket name and re-run.
 
 #### `input` step times out and pipeline fails
 
@@ -1015,7 +1015,8 @@ CI/CD is not just tooling — it's a **discipline**. The pipelines in this proje
 
 | Document | Type | Priority | Description |
 | :--- | :--- | :--- | :--- |
-| 📄 **[README.md](README.md)** | Core Overview | **Critical** | Main project entry point, local quick start, and architectural overview. |
+| 📄 **[README.md](../README.md)** | Repository Landing | **Critical** | Root project overview, architecture blueprint, and navigation index. |
+| 📄 **[local.md](local.md)** | Local Sandbox | **High** | Walkthrough for starting a local cluster (Kind/Minikube) and running local deployments. |
 | 📄 **[AWS-SETUP.md](AWS-SETUP.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
 | 📄 **[CICD-GUIDE.md](CICD-GUIDE.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
 
