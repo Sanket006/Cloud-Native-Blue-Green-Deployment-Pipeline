@@ -5,7 +5,7 @@
 #   - 2 worker nodes  (mirrors the 2-node EKS setup in terraform/eks.tf)
 #
 # Usage:
-#   kind create cluster --name mycluster --config kind-config.yaml
+#   kind create cluster --name mycluster --config k8s/kind-config.yaml
 #
 # The extraPortMappings block maps NodePort 30080 (defined in k8s/service.yaml)
 # to port 30080 on your local machine, so you can open the app in your browser

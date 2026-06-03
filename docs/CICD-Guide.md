@@ -140,8 +140,8 @@ name: CI — Build & Lint Pipeline
 on:
   push:
     branches: [ main ]
-    paths:             # ← Only trigger when relevant files change
-      - 'app/**'       #   Avoids re-running CI for README edits, etc.
+    paths:
+      - 'app/**'
       - 'k8s/**'
       - 'scripts/**'
       - '.github/workflows/ci.yml'
@@ -152,13 +152,14 @@ on:
       - 'k8s/**'
       - 'scripts/**'
       - '.github/workflows/ci.yml'
-  workflow_dispatch:   # ← Allows manual trigger from the Actions tab
+  workflow_dispatch:
 
+# Limit GITHUB_TOKEN permissions to read-only for security best practices
 permissions:
-  contents: read       # ← Principle of least privilege: read-only token
+  contents: read
 
 jobs:
-  # ── Job 1: Lint Code & Shell Scripts ────────────────────────────────────────
+  # 1. Lint Code & Shell Scripts
   lint:
     name: Code Lint & Syntax Check
     runs-on: ubuntu-latest
@@ -177,15 +178,16 @@ jobs:
           npm install
 
       - name: Validate JavaScript Syntax
-        run: node --check app/server.js   # Fast syntax check without running the app
+        run: |
+          node --check app/server.js
 
       - name: Lint Shell Scripts
         uses: ludeeus/action-shellcheck@2.0.0
         with:
-          severity: error    # Only fail on errors, not warnings
+          severity: error
           scandir: ./scripts
 
-  # ── Job 2: Validate Kubernetes Manifests ────────────────────────────────────
+  # 2. Validate Kubernetes Manifests
   k8s-validate:
     name: Kubernetes Manifest Lint
     runs-on: ubuntu-latest
@@ -196,9 +198,10 @@ jobs:
       - name: Run Kube-Linter
         uses: stackrox/kube-linter-action@v1.0.4
         with:
-          directory: k8s   # Scans all YAML files under k8s/
+          directory: k8s
+          # Allow it to warn/fail if there are serious security or configuration issues in k8s manifests
 
-  # ── Job 3: Verify Docker Build ───────────────────────────────────────────────
+  # 3. Verify Docker Container Builds
   docker-build:
     name: Docker Build Verification
     runs-on: ubuntu-latest
@@ -214,7 +217,7 @@ jobs:
         with:
           context: ./app
           file: ./app/Dockerfile
-          push: false          # ← Build only; do NOT push to any registry
+          push: false
           tags: devops-demo/bg-app:blue
 
       - name: Build Docker Image (Green)
@@ -225,10 +228,10 @@ jobs:
           push: false
           tags: devops-demo/bg-app:green
 
-  # ── Job 4: Continuous Deployment to AWS EKS (gated by secrets) ───────────────
+  # 4. Continuous Deployment (CD) — Gated Deployment to AWS EKS
   deploy-aws:
     name: Continuous Deployment (AWS EKS)
-    needs: [lint, k8s-validate, docker-build]  # ← Only runs if all CI jobs pass
+    needs: [lint, k8s-validate, docker-build]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
@@ -241,17 +244,46 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-        continue-on-error: true  # ← Gracefully skip if secrets aren't configured
+        continue-on-error: true # Allow it to fail gracefully if secrets are not set
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.30.0'
 
       - name: Check AWS Credentials & Trigger CD
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
           if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-            echo "⚠️  CD GATED — AWS secrets not configured. CI passed successfully."
+            echo "========================================================================="
+            echo "⚠️  CD GATED — AWS secrets are not configured in this repository."
+            echo "    All CI verification steps (Lint, Kube-Linter, Docker build) PASSED!"
+            echo "    The codebase is healthy and verified."
+            echo ""
+            echo "    To activate automated CD to AWS EKS:"
+            echo "      1. Go to repository Settings -> Secrets and variables -> Actions."
+            echo "      2. Define AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY."
+            echo "      3. Push a commit to the 'main' branch."
+            echo "========================================================================="
             exit 0
           fi
-          echo "🚀 Secrets detected. Deploying to AWS EKS..."
+
+          echo "🚀 Secrets detected. Initializing AWS EKS Continuous Deployment..."
+
+          # Initialise Terraform with the S3 remote backend BEFORE running the deploy
+          # script. In a fresh CI runner there is no local .terraform directory, so
+          # 'terraform output' would fail with exit code 1 without this step.
+          echo "--- Initialising Terraform remote state backend ---"
+          cd terraform
+          terraform init -input=false -reconfigure
+          cd ..
+
           chmod +x scripts/deploy-aws.sh
           ./scripts/deploy-aws.sh
 ```
@@ -291,33 +323,49 @@ on:
           - blue
           - green
 
+# Limit GITHUB_TOKEN permissions to read-only for security best practices
+permissions:
+  contents: read
+
 jobs:
   switch-traffic:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Pin to a specific kubectl version for reproducible, predictable runs.
+      # Update this version intentionally when you want to upgrade.
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.30.0'   # ← Pin exact version for reproducibility
+          version: 'v1.30.0'
 
-      # Uncomment once KUBECONFIG secret is configured:
-      # - name: Set up Kubeconfig
-      #   env:
-      #     KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
-      #   run: |
-      #     mkdir -p $HOME/.kube
-      #     echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
-      #     chmod 600 $HOME/.kube/config
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        env:
+          EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws eks update-kubeconfig \
+            --region "$AWS_REGION" \
+            --name "$EKS_CLUSTER_NAME"
 
       - name: Switch Traffic (Patch Service Selector)
         env:
           TARGET_ENV: ${{ github.event.inputs.target_env }}
         run: |
+          echo "🚀 Actively switching traffic to environment: $TARGET_ENV"
           kubectl patch service bg-demo-service \
             -p "{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}"
+          echo "✅ Traffic routing updated successfully."
 ```
 
 #### How to Run This Workflow
@@ -330,10 +378,12 @@ jobs:
 
 #### Activating Against a Real Cluster
 
-1. Obtain your kubeconfig: `cat ~/.kube/config` (or use `aws eks update-kubeconfig` output).
-2. Add it as a repository secret named `KUBECONFIG`.
-3. Uncomment the `Set up Kubeconfig` step in the workflow file.
-4. Uncomment the `kubectl patch` command in the `Switch Traffic` step.
+To switch traffic against a real AWS EKS cluster, you need to configure the following repository secrets:
+1. `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to authenticate with AWS.
+2. `AWS_REGION` specifying the region where your EKS cluster is deployed (e.g., `us-east-1`).
+3. `EKS_CLUSTER_NAME` specifying the name of your EKS cluster.
+
+The workflow is pre-configured to dynamically authenticate and update your local kubeconfig automatically using these secrets.
 
 ---
 
@@ -348,6 +398,9 @@ This workflow provisions or tears down all AWS infrastructure (EKS cluster, VPC,
 ```yaml
 name: AWS Infrastructure — Terraform Provisioning
 
+# This workflow allows operators to provision or destroy AWS infrastructure manually.
+# Using 'workflow_dispatch' (manual trigger) prevents accidental resource creation,
+# avoiding unexpected AWS charges or resource leaks.
 on:
   workflow_dispatch:
     inputs:
@@ -360,35 +413,77 @@ on:
           - apply
           - destroy
 
+# Limit permissions to read-only for security best practices
+permissions:
+  contents: read
+
 jobs:
   terraform:
+    name: Terraform Provisioning Run
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
+    steps:
+      - name: 1. Checkout repository code
+        uses: actions/checkout@v4
+        with:
+          # Simple check to guarantee code is checked out successfully
+          persist-credentials: false
+
+      - name: 2. Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+        # Set continue-on-error to true so the job can output friendly setup instructions 
+        # instead of failing blindly if credentials are not configured yet.
+        continue-on-error: true
 
-      - name: Set up Terraform CLI
+      - name: 3. Set up Terraform CLI
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.0
 
-      - name: Run Terraform
+      - name: 4. Check credentials & Run Terraform
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           ACTION: ${{ github.event.inputs.action }}
         run: |
+          # Verify that AWS credentials exist in secrets
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "========================================================================="
+            echo "⚠️  TERRAFORM GATED — AWS secrets are missing in repository settings!"
+            echo ""
+            echo "    To configure your secrets and activate this pipeline:"
+            echo "      1. Go to repository Settings -> Secrets and variables -> Actions."
+            echo "      2. Create 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' secrets."
+            echo "      3. Return to the Actions tab and rerun this workflow manually."
+            echo "========================================================================="
+            exit 1
+          fi
+
+          echo "🎬 Starting Terraform provisioning process inside 'terraform/' directory..."
           cd terraform
+
+          # ── STEP A: Initialize working directory ─────────────────────────────
+          echo "❇️  Running 'terraform init'..."
           terraform init
+
+          # ── STEP B: Select Action (Apply or Destroy) ─────────────────────────
           if [ "$ACTION" = "apply" ]; then
+            echo "❇️  Running 'terraform plan' to dry-run changes..."
             terraform plan
+            
+            echo "🚀 Running 'terraform apply' to deploy EKS, ECR, and VPC..."
             terraform apply -auto-approve
+            
           elif [ "$ACTION" = "destroy" ]; then
+            echo "🔥 Running 'terraform destroy' to teardown AWS resources..."
             terraform destroy -auto-approve
+            
+          else
+            echo "Error: Unknown action: $ACTION"
+            exit 1
           fi
 ```
 
@@ -412,9 +507,10 @@ GitHub Actions uses **encrypted repository secrets** to securely pass credential
 
 | Secret Name | Where Used | How to Get It |
 |-------------|-----------|---------------|
-| `AWS_ACCESS_KEY_ID` | `ci.yml`, `terraform-provision.yml` | AWS Console → IAM → Users → Security credentials → Create access key |
-| `AWS_SECRET_ACCESS_KEY` | `ci.yml`, `terraform-provision.yml` | Same as above (shown only once at creation time) |
-| `KUBECONFIG` | `blue-green-cd.yml` | `cat ~/.kube/config` after `aws eks update-kubeconfig` |
+| `AWS_ACCESS_KEY_ID` | `ci.yml`, `blue-green-cd.yml`, `terraform-provision.yml` | AWS Console → IAM → Users → Security credentials → Create access key |
+| `AWS_SECRET_ACCESS_KEY` | `ci.yml`, `blue-green-cd.yml`, `terraform-provision.yml` | Same as above (shown only once at creation time) |
+| `AWS_REGION` | `blue-green-cd.yml` | The region of your EKS cluster (e.g. `us-east-1`) |
+| `EKS_CLUSTER_NAME` | `blue-green-cd.yml` | The name of your EKS cluster configured in Terraform outputs or eks.tf (default: `bg-demo-cluster`) |
 
 > 🔒 **Security tip:** Use dedicated IAM users with minimal permissions for CI/CD. Never use your root AWS account keys.
 
@@ -608,8 +704,8 @@ pipeline {
             }
             steps {
                 echo "Running initial deployment..."
-                sh 'chmod +x scripts/deploy.sh'
-                sh './scripts/deploy.sh'
+                sh 'chmod +x scripts/deploy-local.sh'
+                sh './scripts/deploy-local.sh'
             }
         }
 
@@ -908,14 +1004,14 @@ The first build of a parameterized pipeline runs with default values without sho
 #### `sh` step fails with "Permission denied"
 
 ```
-chmod +x scripts/deploy.sh
+chmod +x scripts/deploy-local.sh
 ```
 
 Ensure the script files have the executable bit set. Alternatively, set it explicitly in the Jenkinsfile (as this project does):
 
 ```groovy
-sh 'chmod +x scripts/deploy.sh'
-sh './scripts/deploy.sh'
+sh 'chmod +x scripts/deploy-local.sh'
+sh './scripts/deploy-local.sh'
 ```
 
 #### `credentials()` returns empty value

@@ -44,7 +44,7 @@ All detailed user guides, infrastructure setup instructions, and pipeline guides
 │   └── service.yaml             # NodePort routing service
 │
 ├── scripts/                     # Operational Bash scripts
-│   ├── deploy.sh                # Local image builder & deployment script
+│   ├── deploy-local.sh          # Local image builder & deployment script
 │   ├── deploy-aws.sh            # ECR login/push and EKS deployment
 │   └── switch-traffic.sh        # Traffic routing selector patcher
 │
@@ -67,12 +67,12 @@ All detailed user guides, infrastructure setup instructions, and pipeline guides
 
 1. Make scripts executable:
    ```bash
-   chmod +x scripts/deploy.sh scripts/switch-traffic.sh
+   chmod +x scripts/deploy-local.sh scripts/switch-traffic.sh
    ```
 2. Spin up a local Kind/Minikube cluster.
 3. Deploy both environments:
    ```bash
-   ./scripts/deploy.sh
+   ./scripts/deploy-local.sh
    ```
 4. Access the app at `http://localhost:8080` (or `http://localhost:30080` for Kind).
 5. Switch traffic dynamically:

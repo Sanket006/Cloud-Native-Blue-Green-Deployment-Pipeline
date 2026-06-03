@@ -52,7 +52,7 @@ Blue-Green deployment reduces downtime and release risk by running two identical
 ### Step 1: Make Scripts Executable
 
 ```bash
-chmod +x scripts/deploy.sh
+chmod +x scripts/deploy-local.sh
 chmod +x scripts/switch-traffic.sh
 ```
 
@@ -66,13 +66,13 @@ Choose one of the following:
 minikube start
 
 # OR Kind — use the provided config file (sets up 2 workers + NodePort mapping):
-kind create cluster --name mycluster --config kind-config.yaml
+kind create cluster --name mycluster --config k8s/kind-config.yaml
 ```
 
 ### Step 3: Deploy Blue and Green Environments
 
 ```bash
-./scripts/deploy.sh
+./scripts/deploy-local.sh
 ```
 
 This script:
@@ -81,7 +81,7 @@ This script:
 3. Applies both `blue-deployment.yaml` and `green-deployment.yaml`.
 4. Waits for both rollouts to complete.
 
-> **Kind/Minikube users:** You need to load the local Docker image into your cluster. Uncomment the relevant line in `deploy.sh`:
+> **Kind/Minikube users:** You need to load the local Docker image into your cluster. Uncomment the relevant line in `deploy-local.sh`:
 > ```bash
 > # kind load docker-image devops-demo/bg-app:blue devops-demo/bg-app:green
 > # minikube image load devops-demo/bg-app:blue devops-demo/bg-app:green
@@ -107,7 +107,7 @@ You will see a **blue** background with `v1.0 (BLUE)`. The page auto-refreshes e
 </table>
 
 
-> **Tip — skip port-forward with kind:** If you created the cluster using `kind-config.yaml`, NodePort `30080` is already mapped to your machine. Open **http://localhost:30080** directly — no `port-forward` command needed.
+> **Tip — skip port-forward with kind:** If you created the cluster using `k8s/kind-config.yaml`, NodePort `30080` is already mapped to your machine. Open **http://localhost:30080** directly — no `port-forward` command needed.
 
 > **Note for `switch-traffic.sh` users:** After switching traffic, the old `port-forward` stays pinned to its original pod. Run the command printed by `switch-traffic.sh` in a new terminal to reconnect to the correct pod.
 
@@ -176,7 +176,7 @@ A parameterized pipeline with two actions:
 
 | Parameter `ACTION` | What it does |
 |--------------------|-------------|
-| `Deploy` | Runs `scripts/deploy.sh` to build images and deploy both environments |
+| `Deploy` | Runs `scripts/deploy-local.sh` to build images and deploy both environments |
 | `Switch Traffic` | Runs `scripts/switch-traffic.sh <TARGET_ENV>` |
 
 **Setup:** Point a Jenkins Pipeline job at this repo and set the `Script Path` to `Jenkinsfile`.
@@ -206,7 +206,7 @@ Three dedicated workflows live in `.github/workflows/`:
 
 **Activating `ci.yml` auto-deploy:** Add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as repository secrets.
 
-**Activating `blue-green-cd.yml`:** Add a repository secret named `KUBECONFIG` containing your kubeconfig file contents, then uncomment the `Set up Kubeconfig` and `kubectl patch` steps in the workflow file.
+**Activating `blue-green-cd.yml`:** Configure `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, and `EKS_CLUSTER_NAME` as repository secrets. The workflow is pre-configured to dynamically authenticate and update connection details for EKS automatically.
 
 ---
 

@@ -19,8 +19,8 @@ pipeline {
             }
             steps {
                 echo "Running initial deployment..."
-                sh 'chmod +x scripts/deploy.sh'
-                sh './scripts/deploy.sh'
+                sh 'chmod +x scripts/deploy-local.sh'
+                sh './scripts/deploy-local.sh'
             }
         }
 
