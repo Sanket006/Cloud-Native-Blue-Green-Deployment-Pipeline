@@ -51,10 +51,17 @@ jobs:
 
 
       - name: Update kubeconfig
+        env:
+          EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
+          CLUSTER_NAME="${EKS_CLUSTER_NAME:-bg-devops-cluster}"
+          REGION_NAME="${AWS_REGION:-us-east-1}"
+          
           aws eks update-kubeconfig \
-            --region "${{ secrets.AWS_REGION || 'us-east-1' }}" \
-            --name "${{ secrets.EKS_CLUSTER_NAME || 'bg-devops-cluster' }}"
+            --region "$REGION_NAME" \
+            --name "$CLUSTER_NAME"
+
 
 
 
