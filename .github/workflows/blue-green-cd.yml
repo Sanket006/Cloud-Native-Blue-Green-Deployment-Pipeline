@@ -43,13 +43,13 @@ jobs:
           version: 'v1.30.0'
 
       # Uncomment this step once the KUBECONFIG secret is configured (see instructions above).
-      # - name: Set up Kubeconfig
-      #   env:
-      #     KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
-      #   run: |
-      #     mkdir -p $HOME/.kube
-      #     echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
-      #     chmod 600 $HOME/.kube/config
+      - name: Set up Kubeconfig
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
       - name: Switch Traffic (Patch Service Selector)
         env:
@@ -65,6 +65,6 @@ jobs:
           echo "    kubectl patch service bg-demo-service \\"
           echo "      -p '{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}'"
           # Uncomment the lines below once the kubeconfig is configured:
-          # kubectl patch service bg-demo-service \
-          #   -p "{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}"
+          kubectl patch service bg-demo-service \
+            -p "{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}"
 
