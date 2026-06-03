@@ -146,8 +146,8 @@ You will see a **blue** background with `v1.0 (BLUE)`. The page auto-refreshes e
 
 <table>
   <tr>
-    <td align="center"><b>Blue Version (Active)</b><br><img src="blue-version.png" alt="Blue Environment Output" width="380"></td>
-    <td align="center"><b>Green Version (Idle)</b><br><img src="green-version.png" alt="Green Environment Output" width="380"></td>
+    <td align="center"><b>Blue Version (Active)</b><br><img src="docs/assets/blue-version.png" alt="Blue Environment Output" width="380"></td>
+    <td align="center"><b>Green Version (Idle)</b><br><img src="docs/assets/green-version.png" alt="Green Environment Output" width="380"></td>
   </tr>
 </table>
 
