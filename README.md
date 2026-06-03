@@ -47,10 +47,11 @@ All detailed user guides, infrastructure setup instructions, and pipeline guides
 │   ├── Dockerfile               # Multi-stage secure container definition
 │   └── server.js                # Express web server
 │
-├── k8s/                         # Kubernetes manifests
+├── k8s/                         # Kubernetes manifests & configs
 │   ├── blue-deployment.yaml     # Blue version deployment (v1.0)
 │   ├── green-deployment.yaml    # Green version deployment (v2.0)
-│   └── service.yaml             # NodePort routing service
+│   ├── service.yaml             # NodePort routing service
+│   └── kind-config.yaml         # Local Kind cluster configuration
 │
 ├── scripts/                     # Operational Bash scripts
 │   ├── deploy-local.sh          # Local image builder & deployment script
