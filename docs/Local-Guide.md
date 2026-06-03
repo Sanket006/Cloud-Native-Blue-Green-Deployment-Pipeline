@@ -198,7 +198,7 @@ Kubernetes immediately reroutes all new connections to the Green pods. Existing 
 
 For a full cloud deployment using Terraform-provisioned infrastructure, see the dedicated guide:
 
-📄 **[AWS Setup Guide](AWS-SETUP.md)**
+📄 **[AWS Setup Guide](AWS-Guide.md)**
 
 It covers:
 - Optional: Bootstrap S3 remote state for Terraform
@@ -211,7 +211,7 @@ It covers:
 
 ## CI/CD Pipelines
 
-📄 **[CI/CD Pipeline Guide](CICD-GUIDE.md)**
+📄 **[CI/CD Pipeline Guide](CICD-Guide.md)**
 
 This sandbox includes automated build, test, and release configurations for both GitHub Actions and Jenkins. 
 
@@ -291,7 +291,7 @@ terraform destroy
 | Document | Type | Priority | Description |
 | :--- | :--- | :--- | :--- |
 | 📄 **[README.md](../README.md)** | Repository Landing | **Critical** | Root project overview, architecture blueprint, and navigation index. |
-| 📄 **[local.md](local.md)** | Local Sandbox | **High** | Walkthrough for starting a local cluster (Kind/Minikube) and running local deployments. |
-| 📄 **[AWS-SETUP.md](AWS-SETUP.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
-| 📄 **[CICD-GUIDE.md](CICD-GUIDE.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
+| 📄 **[Local-Guide.md](Local-Guide.md)** | Local Sandbox | **High** | Walkthrough for starting a local cluster (Kind/Minikube) and running local deployments. |
+| 📄 **[AWS-Guide.md](AWS-Guide.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
+| 📄 **[CICD-Guide.md](CICD-Guide.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
 

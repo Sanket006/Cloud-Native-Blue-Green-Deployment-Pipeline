@@ -1016,9 +1016,9 @@ CI/CD is not just tooling — it's a **discipline**. The pipelines in this proje
 | Document | Type | Priority | Description |
 | :--- | :--- | :--- | :--- |
 | 📄 **[README.md](../README.md)** | Repository Landing | **Critical** | Root project overview, architecture blueprint, and navigation index. |
-| 📄 **[local.md](local.md)** | Local Sandbox | **High** | Walkthrough for starting a local cluster (Kind/Minikube) and running local deployments. |
-| 📄 **[AWS-SETUP.md](AWS-SETUP.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
-| 📄 **[CICD-GUIDE.md](CICD-GUIDE.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
+| 📄 **[Local-Guide.md](Local-Guide.md)** | Local Sandbox | **High** | Walkthrough for starting a local cluster (Kind/Minikube) and running local deployments. |
+| 📄 **[AWS-Guide.md](AWS-Guide.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
+| 📄 **[CICD-Guide.md](CICD-Guide.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
 
 > 💡 **Tip:** To master CI/CD faster, break something intentionally. Introduce a syntax error in `app/server.js`, push it, and watch the CI pipeline catch it in seconds. That immediate feedback loop is exactly what CI/CD is built for.
 

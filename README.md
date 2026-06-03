@@ -10,9 +10,9 @@ All detailed user guides, infrastructure setup instructions, and pipeline guides
 
 | Guide | Description | Target Audience |
 | :--- | :--- | :--- |
-| 📄 **[Main Sandbox Overview & Local Setup](docs/local.md)** | Learn the blue-green concept, start local cluster (Kind/Minikube), run deployment, and test traffic routing. | Beginners & Operators |
-| 📄 **[AWS EKS Setup Guide](docs/AWS-SETUP.md)** | Provision AWS infrastructure (VPC, ECR, EKS) using Terraform and deploy the app to the cloud. | Intermediate & Advanced |
-| 📄 **[CI/CD Pipelines Manual](docs/CICD-GUIDE.md)** | Comprehensive instructions for setting up GitHub Actions workflows and local/AWS Jenkins files. | All Levels |
+| 📄 **[Main Sandbox Overview & Local Setup](docs/Local-Guide.md)** | Learn the blue-green concept, start local cluster (Kind/Minikube), run deployment, and test traffic routing. | Beginners & Operators |
+| 📄 **[AWS EKS Setup Guide](docs/AWS-Guide.md)** | Provision AWS infrastructure (VPC, ECR, EKS) using Terraform and deploy the app to the cloud. | Intermediate & Advanced |
+| 📄 **[CI/CD Pipelines Manual](docs/CICD-Guide.md)** | Comprehensive instructions for setting up GitHub Actions workflows and local/AWS Jenkins files. | All Levels |
 
 ---
 
@@ -21,9 +21,9 @@ All detailed user guides, infrastructure setup instructions, and pipeline guides
 ```
 ├── docs/                        # Complete project documentation
 │   ├── assets/                  # Deployment output screenshots
-│   ├── local.md                 # Local setup guide
-│   ├── AWS-SETUP.md             # AWS/EKS setup guide
-│   └── CICD-GUIDE.md            # GitHub Actions & Jenkins pipeline guide
+│   ├── Local-Guide.md           # Local setup guide
+│   ├── AWS-Guide.md             # AWS/EKS setup guide
+│   └── CICD-Guide.md            # GitHub Actions & Jenkins pipeline guide
 │
 ├── app/                         # Node.js demo web application code
 │   ├── Dockerfile               # Multi-stage secure container definition
