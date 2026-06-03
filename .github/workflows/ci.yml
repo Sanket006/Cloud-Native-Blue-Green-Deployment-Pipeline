@@ -138,5 +138,15 @@ jobs:
           fi
 
           echo "🚀 Secrets detected. Initializing AWS EKS Continuous Deployment..."
+
+          # Initialise Terraform with the S3 remote backend BEFORE running the deploy
+          # script. In a fresh CI runner there is no local .terraform directory, so
+          # 'terraform output' would fail with exit code 1 without this step.
+          echo "--- Initialising Terraform remote state backend ---"
+          cd terraform
+          terraform init -input=false -reconfigure
+          cd ..
+
           chmod +x scripts/deploy-aws.sh
           ./scripts/deploy-aws.sh
+

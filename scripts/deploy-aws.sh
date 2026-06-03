@@ -8,9 +8,13 @@ echo "=============================================="
 # Define AWS region
 REGION="us-east-1"
 
-# 1. Fetch outputs from Terraform
+# 1. Initialise Terraform (required in CI where no local .terraform dir exists)
+#    and fetch outputs from the remote state backend.
 cd terraform || { echo "Error: 'terraform/' directory not found. Run this script from the project root."; exit 1; }
-# Suppress stderr to keep warning outputs clean
+
+echo "Initialising Terraform (reading remote state backend)..."
+terraform init -input=false -reconfigure 2>&1 | tail -5   # Show last 5 lines so CI logs stay clean
+
 ECR_URL=$(terraform output -raw ecr_repository_url 2>/dev/null || true)
 CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || true)
 cd ..
