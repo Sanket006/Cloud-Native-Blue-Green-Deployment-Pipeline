@@ -2,6 +2,15 @@
 
 > **A production-realistic, end-to-end DevOps sandbox** for learning zero-downtime blue-green deployment strategies using Docker, Kubernetes, Terraform (AWS EKS), and Jenkins/GitHub Actions CI/CD.
 
+#### Zero-Downtime Sandbox Output:
+
+<table>
+  <tr>
+    <td align="center"><b>Blue Version (Active)</b><br><img src="docs/assets/blue-version.png" alt="Blue Environment Output" width="380"></td>
+    <td align="center"><b>Green Version (Idle)</b><br><img src="docs/assets/green-version.png" alt="Green Environment Output" width="380"></td>
+  </tr>
+</table>
+
 ---
 
 ## 📂 Project Documentation

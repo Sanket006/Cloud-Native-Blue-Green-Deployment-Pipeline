@@ -24,46 +24,50 @@ Blue-Green deployment reduces downtime and release risk by running two identical
 ## Project Architecture
 
 ```
-cloud-native-blue-green-deployment-pipeline/
-├── app/                        # Node.js demo application
-│   ├── Dockerfile              # Multi-stage-friendly Node 18 Alpine image
-│   ├── package.json            # Express dependency
-│   ├── server.js               # REST API + env-driven version reporting
+├── docs/                        # Complete project documentation
+│   ├── assets/                  # Deployment output screenshots
+│   ├── Local-Guide.md           # Local setup guide (this file)
+│   ├── AWS-Guide.md             # AWS/EKS setup guide
+│   └── CICD-Guide.md            # GitHub Actions & Jenkins pipeline guide
+│
+├── app/                         # Node.js demo application
+│   ├── Dockerfile               # Multi-stage-friendly Node 18 Alpine image
+│   ├── package.json             # Express dependency
+│   ├── server.js                # REST API + env-driven version reporting
 │   └── public/
-│       └── index.html          # Auto-refreshing UI (shows blue/green + pod name)
+│       └── index.html           # Auto-refreshing UI (shows blue/green + pod name)
 │
-├── k8s/                        # Kubernetes manifests
-│   ├── blue-deployment.yaml    # Deployment: 2 replicas, tag :blue, APP_VERSION=blue
-│   ├── green-deployment.yaml   # Deployment: 2 replicas, tag :green, APP_VERSION=green
-│   └── service.yaml            # NodePort service — selector.version drives traffic
+├── k8s/                         # Kubernetes manifests
+│   ├── blue-deployment.yaml     # Deployment: 2 replicas, tag :blue, APP_VERSION=blue
+│   ├── green-deployment.yaml    # Deployment: 2 replicas, tag :green, APP_VERSION=green
+│   └── service.yaml             # NodePort service — selector.version drives traffic
 │
-├── scripts/                    # Automation shell scripts
-│   ├── deploy.sh               # Local: build images + apply all manifests
-│   ├── switch-traffic.sh       # Universal: patch service selector to blue or green
-│   └── deploy-aws.sh           # AWS: login to ECR, push images, deploy to EKS
+├── scripts/                     # Automation shell scripts
+│   ├── deploy.sh                # Local: build images + apply all manifests
+│   ├── switch-traffic.sh        # Universal: patch service selector to blue or green
+│   └── deploy-aws.sh            # AWS: login to ECR, push images, deploy to EKS
 │
-├── terraform/                  # AWS Infrastructure-as-Code
-│   ├── provider.tf             # AWS provider + optional S3 remote backend config
-│   ├── variables.tf            # Region, cluster name, ECR repo name
-│   ├── vpc.tf                  # VPC with public/private subnets across 2 AZs
-│   ├── eks.tf                  # EKS cluster + managed node group (t3.medium × 2)
-│   ├── ecr.tf                  # ECR repository for Docker images
-│   ├── outputs.tf              # Outputs: cluster_name, ecr_repository_url, kubectl cmd
-│   └── bootstrap-backend/      # (Optional) S3 + DynamoDB for remote Terraform state
+├── terraform/                   # AWS Infrastructure-as-Code
+│   ├── provider.tf              # AWS provider + optional S3 remote backend config
+│   ├── variables.tf             # Region, cluster name, ECR repo name
+│   ├── vpc.tf                   # VPC with public/private subnets across 2 AZs
+│   ├── eks.tf                   # EKS cluster + managed node group (c7i-flex.large)
+│   ├── ecr.tf                   # ECR repository for Docker images
+│   ├── outputs.tf               # Outputs: cluster_name, ecr_repository_url, kubectl cmd
+│   └── bootstrap-backend/       # (Optional) S3 + DynamoDB for remote Terraform state
 │       ├── main.tf
 │       └── versions.tf
 │
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml              # GitHub Actions: CI lint + Docker build + gated EKS deploy
-│       ├── blue-green-cd.yml   # GitHub Actions: manual traffic switch (workflow_dispatch)
-│       └── terraform-provision.yml  # GitHub Actions: manual Terraform apply/destroy
+│       ├── ci.yml               # GitHub Actions: CI lint + Docker build + gated EKS deploy
+│       ├── blue-green-cd.yml    # GitHub Actions: manual traffic switch (workflow_dispatch)
+│       └── terraform-provision.yml # GitHub Actions: manual Terraform apply/destroy
 │
-├── Jenkinsfile                 # Jenkins pipeline: local deploy + traffic switch
-├── aws.Jenkinsfile             # Jenkins pipeline: Terraform + AWS deploy + switch
-├── kind-config.yaml            # Kind cluster definition (2 workers + NodePort mapping)
-├── AWS-SETUP.md                # Step-by-step guide for the full AWS/EKS path
-└── README.md                   # This file
+├── Jenkinsfile                  # Jenkins pipeline: local deploy + traffic switch
+├── aws.Jenkinsfile              # Jenkins pipeline: Terraform + AWS deploy + switch
+├── kind-config.yaml             # Kind cluster definition (2 workers + NodePort mapping)
+└── README.md                    # Main landing entry page pointing to docs/
 ```
 
 ---
