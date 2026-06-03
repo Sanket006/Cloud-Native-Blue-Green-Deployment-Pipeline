@@ -1,0 +1,111 @@
+# =============================================================================
+# Blue-Green DevOps — .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Terraform
+# -----------------------------------------------------------------------------
+
+# Local state files — never commit these; they may contain sensitive data
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash logs from failed Terraform runs
+crash.log
+crash.*.log
+
+# Plan output files — for reference only; should not be committed
+*.tfplan
+
+# Terraform working directories — downloaded by 'terraform init'
+**/.terraform/
+
+# Keep provider lock files — they pin exact dependency versions for reproducibility
+# !.terraform.lock.hcl  (Uncomment this line to re-include lock files if accidentally excluded above)
+
+# Override files — local-only customizations that should not be shared
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform variable files — may contain secrets (API keys, passwords)
+*.tfvars
+*.tfvars.json
+
+# -----------------------------------------------------------------------------
+# AWS Credentials & Secrets
+# -----------------------------------------------------------------------------
+
+# AWS CLI credentials and config files
+.aws/
+credentials
+aws-credentials
+
+# Any file explicitly named with 'secret' or 'credential'
+*secret*
+*credential*
+
+# -----------------------------------------------------------------------------
+# Node.js (app/)
+# -----------------------------------------------------------------------------
+
+# Installed packages — restored via 'npm install'
+node_modules/
+
+# npm debug log
+npm-debug.log*
+
+# Environment variable files — may contain secrets
+.env
+.env.*
+
+# -----------------------------------------------------------------------------
+# Docker
+# -----------------------------------------------------------------------------
+
+# Exported Docker image tarballs (created during kind workaround)
+*.tar
+
+# Docker Compose override files
+docker-compose.override.yml
+
+# -----------------------------------------------------------------------------
+# OS-generated files
+# -----------------------------------------------------------------------------
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows metadata
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux swap files
+*~
+
+# -----------------------------------------------------------------------------
+# IDE & Editor files
+# -----------------------------------------------------------------------------
+
+# VS Code
+.vscode/
+
+# JetBrains IDEs (IntelliJ, GoLand, PyCharm)
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+
+# -----------------------------------------------------------------------------
+# Logs & Temporary files
+# -----------------------------------------------------------------------------
+*.log
+*.tmp
+*.bak
