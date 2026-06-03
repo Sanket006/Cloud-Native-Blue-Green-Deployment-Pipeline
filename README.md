@@ -80,9 +80,12 @@ Here is a directory map of how the files in this project are organized:
 │   ├── blue-green-cd.yml        # Workflow to manually switch traffic on AWS
 │   └── terraform-provision.yml  # Workflow to provision or destroy AWS environments
 │
-└── jenkins/                     # Jenkins Pipeline configurations
-    ├── local.Jenkinsfile        # Pipeline for local deployment and testing
-    └── aws.Jenkinsfile          # Pipeline for deploying to AWS EKS
+├── jenkins/                     # Jenkins Pipeline configurations
+│   ├── local.Jenkinsfile        # Pipeline for local deployment and testing
+│   └── aws.Jenkinsfile          # Pipeline for deploying to AWS EKS
+│
+├── LICENSE                      # Project's license terms
+└── README.md                    # Root project documentation (this file)
 ```
 
 ---
