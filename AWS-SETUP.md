@@ -49,8 +49,8 @@ The Terraform configuration in `terraform/` will create:
 |----------|---------|
 | **VPC** | 10.0.0.0/16 with 2 public + 2 private subnets across 2 AZs |
 | **NAT Gateway** | Single NAT for private subnet internet access |
-| **EKS Cluster** | Kubernetes 1.31, public endpoint enabled |
-| **Node Group** | 2× `t3.medium` on-demand instances (AL2 x86_64) |
+| **EKS Cluster** | Kubernetes 1.35, public endpoint enabled |
+| **Node Group** | 2× `c7i-flex.large` on-demand instances (AL2023) |
 | **ECR Repository** | Private registry for blue/green Docker images |
 
 ```bash
@@ -171,3 +171,8 @@ Use `aws.Jenkinsfile` for a fully automated pipeline:
        AWS_DEFAULT_REGION    = "us-east-1"
    }
    ```
+
+---
+
+📄 **[CI/CD Pipeline Guide](CICD-GUIDE.md)**
+Refer to this guide for step-by-step instructions on setting up automated workflows in GitHub Actions and configuring your Jenkins environment.

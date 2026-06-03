@@ -211,6 +211,10 @@ It covers:
 
 ## CI/CD Pipelines
 
+📄 **[CI/CD Pipeline Guide](CICD-GUIDE.md)**
+
+This sandbox includes automated build, test, and release configurations for both GitHub Actions and Jenkins. 
+
 ### Jenkins — Local (`Jenkinsfile`)
 
 A parameterized pipeline with two actions:
