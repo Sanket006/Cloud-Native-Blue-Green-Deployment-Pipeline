@@ -50,8 +50,16 @@ pipeline {
             }
             steps {
                 echo "Switching AWS cluster traffic to ${params.TARGET_ENV}..."
-                // Assumes kubeconfig is already configured from the Deploy App stage.
-                // If running independently, re-run 'aws eks update-kubeconfig' first.
+                
+                // Dynamically configure EKS kubeconfig context to ensure the switch is applied to the correct AWS cluster
+                dir('terraform') {
+                    sh 'terraform init'
+                }
+                script {
+                    def clusterName = sh(script: "cd terraform && terraform output -raw cluster_name", returnStdout: true).trim()
+                    sh "aws eks update-kubeconfig --region ${env.AWS_DEFAULT_REGION} --name ${clusterName}"
+                }
+                
                 sh 'chmod +x scripts/switch-traffic.sh'
                 sh "./scripts/switch-traffic.sh ${params.TARGET_ENV}"
             }

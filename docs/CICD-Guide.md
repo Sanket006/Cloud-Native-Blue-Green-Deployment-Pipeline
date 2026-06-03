@@ -18,8 +18,8 @@
 4. [Jenkins — Setup & Configuration](#4-jenkins--setup--configuration)
    - [4.1 How Jenkins Works](#41-how-jenkins-works)
    - [4.2 Installing Jenkins](#42-installing-jenkins)
-   - [4.3 Pipeline 1 — Local Deploy (`Jenkinsfile`)](#43-pipeline-1--local-deploy-jenkinsfile)
-   - [4.4 Pipeline 2 — AWS Full Stack (`aws.Jenkinsfile`)](#44-pipeline-2--aws-full-stack-awsjenkinsfile)
+    - [4.3 Pipeline 1 — Local Deploy (`jenkins/local.Jenkinsfile`)](#43-pipeline-1--local-deploy-jenkinslocaljenkinsfile)
+    - [4.4 Pipeline 2 — AWS Full Stack (`jenkins/aws.Jenkinsfile`)](#44-pipeline-2--aws-full-stack-jenkinsawsjenkinsfile)
    - [4.5 Configuring Jenkins Credentials](#45-configuring-jenkins-credentials)
    - [4.6 Creating a Jenkins Pipeline Job](#46-creating-a-jenkins-pipeline-job)
 5. [Best Practices](#5-best-practices)
@@ -71,7 +71,7 @@ Both tools are configured in this project and serve complementary roles. GitHub 
 
 ## 2. Project Pipeline Overview
 
-This project uses **three GitHub Actions workflows** and **two Jenkinsfiles**:
+This project uses **three GitHub Actions workflows** and **two Jenkins Pipeline files**:
 
 ```
 .github/workflows/
@@ -79,8 +79,9 @@ This project uses **three GitHub Actions workflows** and **two Jenkinsfiles**:
 ├── blue-green-cd.yml       ← Manual: switches Kubernetes traffic (blue ↔ green)
 └── terraform-provision.yml ← Manual: provisions or destroys AWS infrastructure
 
-Jenkinsfile                 ← Jenkins: local Kubernetes deploy + traffic switch
-aws.Jenkinsfile             ← Jenkins: full AWS pipeline (Terraform + ECR + EKS)
+jenkins/
+├── local.Jenkinsfile       ← Jenkins: local Kubernetes deploy + traffic switch
+└── aws.Jenkinsfile         ← Jenkins: full AWS pipeline (Terraform + ECR + EKS)
 ```
 
 ### Pipeline Trigger Summary
@@ -90,8 +91,8 @@ aws.Jenkinsfile             ← Jenkins: full AWS pipeline (Terraform + ECR + EK
 | `ci.yml` | Push or PR to `main` | Lint → Kube-lint → Docker build → (optional) EKS deploy |
 | `blue-green-cd.yml` | Manual via GitHub UI | Patches EKS service selector to route traffic |
 | `terraform-provision.yml` | Manual via GitHub UI | Runs `terraform apply` or `terraform destroy` |
-| `Jenkinsfile` | Manual via Jenkins UI | Local: deploys blue/green or switches traffic |
-| `aws.Jenkinsfile` | Manual via Jenkins UI | AWS: Terraform → ECR push → EKS deploy → traffic switch |
+| `jenkins/local.Jenkinsfile` | Manual via Jenkins UI | Local: deploys blue/green or switches traffic |
+| `jenkins/aws.Jenkinsfile` | Manual via Jenkins UI | AWS: Terraform → ECR push → EKS deploy → traffic switch |
 
 ---
 
@@ -663,9 +664,9 @@ Install these during the setup wizard or via **Manage Jenkins → Plugins**:
 
 ---
 
-### 4.3 Pipeline 1 — Local Deploy (`Jenkinsfile`)
+### 4.3 Pipeline 1 — Local Deploy (`jenkins/local.Jenkinsfile`)
 
-**File:** [`Jenkinsfile`](../Jenkinsfile)
+**File:** [`jenkins/local.Jenkinsfile`](../jenkins/local.Jenkinsfile)
 
 This pipeline targets a **local Kubernetes cluster** (Kind, Minikube, Docker Desktop). It provides two parameterized actions.
 
@@ -743,9 +744,9 @@ pipeline {
 
 ---
 
-### 4.4 Pipeline 2 — AWS Full Stack (`aws.Jenkinsfile`)
+### 4.4 Pipeline 2 — AWS Full Stack (`jenkins/aws.Jenkinsfile`)
 
-**File:** [`aws.Jenkinsfile`](../aws.Jenkinsfile)
+**File:** [`jenkins/aws.Jenkinsfile`](../jenkins/aws.Jenkinsfile)
 
 This pipeline orchestrates the **entire AWS lifecycle**: provisioning infrastructure, deploying the app to EKS, switching traffic, and tearing everything down — all from Jenkins.
 
@@ -807,6 +808,16 @@ pipeline {
             when { expression { params.ACTION == 'Switch Traffic' } }
             steps {
                 echo "Switching AWS cluster traffic to ${params.TARGET_ENV}..."
+                
+                // Dynamically configure EKS kubeconfig context to ensure the switch is applied to the correct AWS cluster
+                dir('terraform') {
+                    sh 'terraform init'
+                }
+                script {
+                    def clusterName = sh(script: "cd terraform && terraform output -raw cluster_name", returnStdout: true).trim()
+                    sh "aws eks update-kubeconfig --region ${env.AWS_DEFAULT_REGION} --name ${clusterName}"
+                }
+                
                 sh 'chmod +x scripts/switch-traffic.sh'
                 sh "./scripts/switch-traffic.sh ${params.TARGET_ENV}"
             }
@@ -857,7 +868,7 @@ Never store AWS keys or passwords in the Jenkinsfile. Use Jenkins' built-in Cred
 2. Click **Add Credentials**.
 3. Set **Kind** to `Secret text`.
 4. Enter your AWS Access Key ID as the **Secret**.
-5. Set **ID** to `aws-access-key-id` (must match exactly what's in `aws.Jenkinsfile`).
+5. Set **ID** to `aws-access-key-id` (must match exactly what's in `jenkins/aws.Jenkinsfile`).
 6. Click **Create**.
 7. Repeat for `aws-secret-access-key`.
 
@@ -874,7 +885,7 @@ Never store AWS keys or passwords in the Jenkinsfile. Use Jenkins' built-in Cred
 
 ### 4.6 Creating a Jenkins Pipeline Job
 
-#### For `Jenkinsfile` (Local Pipeline)
+#### For `jenkins/local.Jenkinsfile` (Local Sandbox)
 
 1. Click **New Item** on the Jenkins dashboard.
 2. Enter a name (e.g., `blue-green-local`).
@@ -883,12 +894,12 @@ Never store AWS keys or passwords in the Jenkinsfile. Use Jenkins' built-in Cred
 5. Set **Definition** to `Pipeline script from SCM`.
 6. Set **SCM** to `Git`.
 7. Enter your repository URL.
-8. Set **Script Path** to `Jenkinsfile`.
+8. Set **Script Path** to `jenkins/local.Jenkinsfile`.
 9. Click **Save**.
 
-#### For `aws.Jenkinsfile` (AWS Pipeline)
+#### For `jenkins/aws.Jenkinsfile` (AWS Pipeline)
 
-Follow the same steps but set **Script Path** to `aws.Jenkinsfile`.
+Follow the same steps but set **Script Path** to `jenkins/aws.Jenkinsfile`.
 
 #### Running a Parameterized Build
 
@@ -1049,7 +1060,7 @@ Then update [`terraform/provider.tf`](../terraform/provider.tf) with the output 
 
 #### `input` step times out and pipeline fails
 
-The `input` step in `aws.Jenkinsfile` waits indefinitely for a human response. If the pipeline is abandoned, Jenkins may mark it as failed after a configurable timeout. Set a timeout with:
+The `input` step in `jenkins/aws.Jenkinsfile` waits indefinitely for a human response. If the pipeline is abandoned, Jenkins may mark it as failed after a configurable timeout. Set a timeout with:
 
 ```groovy
 stage('Confirm Destroy') {
@@ -1084,8 +1095,8 @@ You now have a complete picture of how CI/CD is implemented in this Blue-Green D
 | CD to EKS is gated behind AWS secrets | `ci.yml` deploy-aws job |
 | Traffic can be switched with one click | `blue-green-cd.yml` workflow dispatch |
 | Infrastructure is provisioned/destroyed safely | `terraform-provision.yml` + manual `input` gate |
-| Local environments are managed by Jenkins | `Jenkinsfile` with parameterized actions |
-| Full AWS lifecycle is orchestrated by Jenkins | `aws.Jenkinsfile` with 4 parameterized stages |
+| Local environments are managed by Jenkins | `jenkins/local.Jenkinsfile` with parameterized actions |
+| Full AWS lifecycle is orchestrated by Jenkins | `jenkins/aws.Jenkinsfile` with 4 parameterized stages |
 
 CI/CD is not just tooling — it's a **discipline**. The pipelines in this project encode operational knowledge: what to check before deploying, how to safely switch traffic, and how to protect against accidental destruction. Reading and understanding a Jenkinsfile or a GitHub Actions workflow is just as important as understanding the application code itself.
 

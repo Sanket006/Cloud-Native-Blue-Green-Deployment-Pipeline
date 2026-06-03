@@ -57,8 +57,9 @@ All detailed user guides, infrastructure setup instructions, and pipeline guides
 │   ├── blue-green-cd.yml        # Manual traffic selector switcher
 │   └── terraform-provision.yml  # Manual AWS Infrastructure lifecycle control
 │
-├── Jenkinsfile                  # Local Jenkins Pipeline definition
-└── aws.Jenkinsfile              # AWS EKS Jenkins Pipeline definition
+├── jenkins/                     # Jenkins Pipeline configurations
+│   ├── local.Jenkinsfile        # Local Jenkins Pipeline definition
+│   └── aws.Jenkinsfile          # AWS EKS Jenkins Pipeline definition
 ```
 
 ---

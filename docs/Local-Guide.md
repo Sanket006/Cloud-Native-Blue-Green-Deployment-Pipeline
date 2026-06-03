@@ -170,7 +170,7 @@ It covers:
 
 This sandbox includes automated build, test, and release configurations for both GitHub Actions and Jenkins. 
 
-### Jenkins — Local (`Jenkinsfile`)
+### Jenkins — Local (`jenkins/local.Jenkinsfile`)
 
 A parameterized pipeline with two actions:
 
@@ -179,9 +179,9 @@ A parameterized pipeline with two actions:
 | `Deploy` | Runs `scripts/deploy-local.sh` to build images and deploy both environments |
 | `Switch Traffic` | Runs `scripts/switch-traffic.sh <TARGET_ENV>` |
 
-**Setup:** Point a Jenkins Pipeline job at this repo and set the `Script Path` to `Jenkinsfile`.
+**Setup:** Point a Jenkins Pipeline job at this repo and set the `Script Path` to `jenkins/local.Jenkinsfile`.
 
-### Jenkins — AWS (`aws.Jenkinsfile`)
+### Jenkins — AWS (`jenkins/aws.Jenkinsfile`)
 
 A full end-to-end AWS pipeline with four stages:
 
@@ -219,7 +219,7 @@ Three dedicated workflows live in `.github/workflows/`:
 | Kubernetes Deployments & Services | `k8s/` |
 | Infrastructure as Code | `terraform/` |
 | Remote Terraform state | `terraform/bootstrap-backend/` + `provider.tf` |
-| Jenkins parameterized pipelines | `Jenkinsfile`, `aws.Jenkinsfile` |
+| Jenkins parameterized pipelines | `jenkins/local.Jenkinsfile`, `jenkins/aws.Jenkinsfile` |
 | GitHub Actions CI/CD | `.github/workflows/ci.yml`, `blue-green-cd.yml`, `terraform-provision.yml` |
 
 ---

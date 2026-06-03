@@ -147,7 +147,7 @@ terraform destroy   # type 'yes' to confirm
 
 ## Automating with Jenkins CI/CD
 
-Use `aws.Jenkinsfile` for a fully automated pipeline:
+Use `jenkins/aws.Jenkinsfile` for a fully automated pipeline:
 
 | Stage | Triggered when ACTION = |
 |-------|------------------------|
