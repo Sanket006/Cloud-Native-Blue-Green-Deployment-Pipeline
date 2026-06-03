@@ -42,25 +42,48 @@ jobs:
         with:
           version: 'v1.30.0'
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+
       - name: Set up Kubeconfig
         env:
           KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
         run: |
-          mkdir -p $HOME/.kube
-          if [[ "$KUBECONFIG_CONTENT" =~ "apiVersion" ]]; then
-            echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
-          else
-            echo "Kubeconfig content is not raw YAML/JSON. Attempting base64 decode..."
-            decoded=$(echo "$KUBECONFIG_CONTENT" | base64 --decode 2>/dev/null || echo "")
-            if [[ "$decoded" =~ "apiVersion" ]]; then
-              echo "$decoded" > $HOME/.kube/config
-              echo "Successfully decoded base64 Kubeconfig."
-            else
-              echo "Decoding failed or did not match expected structure. Writing content as-is."
-              echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
-            fi
-          fi
+          python3 -c '
+          import os, base64
+          content = os.environ.get("KUBECONFIG_CONTENT", "").strip()
+          # Strip leading/trailing single or double quotes
+          if (content.startswith("\"") and content.endswith("\"")) or (content.startswith("\u0027") and content.endswith("\u0027")):
+              content = content[1:-1].strip()
+
+          if "apiVersion" in content:
+              print("Detected raw Kubeconfig.")
+              result = content
+          else:
+              print("Attempting base64 decode of Kubeconfig...")
+              try:
+                  decoded = base64.b64decode(content).decode("utf-8").strip()
+                  if "apiVersion" in decoded:
+                      print("Successfully decoded base64 Kubeconfig.")
+                      result = decoded
+                  else:
+                      raise ValueError("Decoded content does not contain apiVersion")
+              except Exception as e:
+                  print(f"Decoding failed: {e}. Writing raw content as-is.")
+                  result = content
+
+          kube_dir = os.path.expanduser("~/.kube")
+          os.makedirs(kube_dir, exist_ok=True)
+          with open(os.path.join(kube_dir, "config"), "w", encoding="utf-8") as f:
+              f.write(result)
+          '
           chmod 600 $HOME/.kube/config
+
 
 
       - name: Switch Traffic (Patch Service Selector)
