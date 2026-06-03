@@ -50,39 +50,12 @@ jobs:
           aws-region: us-east-1
 
 
-      - name: Set up Kubeconfig
-        env:
-          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
+      - name: Update kubeconfig
         run: |
-          python3 -c '
-          import os, base64
-          content = os.environ.get("KUBECONFIG_CONTENT", "").strip()
-          # Strip leading/trailing single or double quotes
-          if (content.startswith("\"") and content.endswith("\"")) or (content.startswith("\u0027") and content.endswith("\u0027")):
-              content = content[1:-1].strip()
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name bg-devops-cluster
 
-          if "apiVersion" in content:
-              print("Detected raw Kubeconfig.")
-              result = content
-          else:
-              print("Attempting base64 decode of Kubeconfig...")
-              try:
-                  decoded = base64.b64decode(content).decode("utf-8").strip()
-                  if "apiVersion" in decoded:
-                      print("Successfully decoded base64 Kubeconfig.")
-                      result = decoded
-                  else:
-                      raise ValueError("Decoded content does not contain apiVersion")
-              except Exception as e:
-                  print(f"Decoding failed: {e}. Writing raw content as-is.")
-                  result = content
-
-          kube_dir = os.path.expanduser("~/.kube")
-          os.makedirs(kube_dir, exist_ok=True)
-          with open(os.path.join(kube_dir, "config"), "w", encoding="utf-8") as f:
-              f.write(result)
-          '
-          chmod 600 $HOME/.kube/config
 
 
 
