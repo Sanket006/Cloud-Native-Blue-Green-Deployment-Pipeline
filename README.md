@@ -283,3 +283,14 @@ terraform destroy
 ```
 
 > ⚠️ **Always run `terraform destroy` when done with AWS testing.** EKS clusters and NAT Gateways accrue costs even when idle.
+
+---
+
+## 📚 Related Documentation
+
+| Document | Type | Priority | Description |
+| :--- | :--- | :--- | :--- |
+| 📄 **[README.md](README.md)** | Core Overview | **Critical** | Main project entry point, local quick start, and architectural overview. |
+| 📄 **[AWS-SETUP.md](AWS-SETUP.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
+| 📄 **[CICD-GUIDE.md](CICD-GUIDE.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
+

@@ -174,5 +174,11 @@ Use `aws.Jenkinsfile` for a fully automated pipeline:
 
 ---
 
-📄 **[CI/CD Pipeline Guide](CICD-GUIDE.md)**
-Refer to this guide for step-by-step instructions on setting up automated workflows in GitHub Actions and configuring your Jenkins environment.
+## 📚 Related Documentation
+
+| Document | Type | Priority | Description |
+| :--- | :--- | :--- | :--- |
+| 📄 **[README.md](README.md)** | Core Overview | **Critical** | Main project entry point, local quick start, and architectural overview. |
+| 📄 **[AWS-SETUP.md](AWS-SETUP.md)** | Infrastructure | **High** | Step-by-step instructions for provisioning EKS/ECR/VPC via Terraform. |
+| 📄 **[CICD-GUIDE.md](CICD-GUIDE.md)** | CI/CD Reference | **High** | Detailed setups, YAML/Jenkinsfile configuration, and troubleshooting for GitHub Actions & Jenkins. |
+
