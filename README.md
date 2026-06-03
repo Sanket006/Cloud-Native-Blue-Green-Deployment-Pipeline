@@ -55,7 +55,9 @@ cloud-native-blue-green-deployment-pipeline/
 │
 ├── .github/
 │   └── workflows/
-│       └── blue-green-cd.yml   # GitHub Actions: manual traffic switch trigger
+│       ├── ci.yml              # GitHub Actions: CI lint + Docker build + gated EKS deploy
+│       ├── blue-green-cd.yml   # GitHub Actions: manual traffic switch (workflow_dispatch)
+│       └── terraform-provision.yml  # GitHub Actions: manual Terraform apply/destroy
 │
 ├── Jenkinsfile                 # Jenkins pipeline: local deploy + traffic switch
 ├── aws.Jenkinsfile             # Jenkins pipeline: Terraform + AWS deploy + switch
@@ -83,7 +85,7 @@ cloud-native-blue-green-deployment-pipeline/
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Terraform | ≥ 1.5 | Provision EKS, VPC, ECR |
+| Terraform | ≥ 1.7 | Provision EKS, VPC, ECR |
 | AWS CLI | ≥ 2.x | Interact with AWS; configure credentials |
 | kubectl | Latest | Apply manifests to EKS |
 | Docker | Latest | Build and push images to ECR |
@@ -223,12 +225,19 @@ A full end-to-end AWS pipeline with four stages:
 
 **Setup:** The Jenkins agent must have AWS credentials configured (IAM role or `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` environment variables).
 
-### GitHub Actions (`.github/workflows/blue-green-cd.yml`)
+### GitHub Actions — CI/CD (`ci.yml`, `blue-green-cd.yml`, `terraform-provision.yml`)
 
-A manually-triggered (`workflow_dispatch`) workflow that performs traffic switching. To make it functional against a real cluster:
+Three dedicated workflows live in `.github/workflows/`:
 
-1. Store your kubeconfig as a GitHub repository secret named `KUBECONFIG`.
-2. Uncomment the `Set up Kubeconfig` and `kubectl patch` steps in the workflow file.
+| Workflow file | Trigger | What it does |
+|---|---|---|
+| `ci.yml` | Push / PR to `main` | Runs lint, kube-linter, Docker build, then auto-deploys to EKS if AWS secrets are set |
+| `blue-green-cd.yml` | Manual (`workflow_dispatch`) | Patches the EKS service selector to switch traffic between blue and green |
+| `terraform-provision.yml` | Manual (`workflow_dispatch`) | Runs `terraform apply` or `terraform destroy` against your AWS account |
+
+**Activating `ci.yml` auto-deploy:** Add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as repository secrets.
+
+**Activating `blue-green-cd.yml`:** Add a repository secret named `KUBECONFIG` containing your kubeconfig file contents, then uncomment the `Set up Kubeconfig` and `kubectl patch` steps in the workflow file.
 
 ---
 
@@ -242,7 +251,7 @@ A manually-triggered (`workflow_dispatch`) workflow that performs traffic switch
 | Infrastructure as Code | `terraform/` |
 | Remote Terraform state | `terraform/bootstrap-backend/` + `provider.tf` |
 | Jenkins parameterized pipelines | `Jenkinsfile`, `aws.Jenkinsfile` |
-| GitHub Actions CD | `.github/workflows/blue-green-cd.yml` |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml`, `blue-green-cd.yml`, `terraform-provision.yml` |
 
 ---
 

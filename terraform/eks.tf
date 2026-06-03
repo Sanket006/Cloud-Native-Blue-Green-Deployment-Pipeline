@@ -27,7 +27,7 @@ module "eks" {
   eks_managed_node_groups = {
     general = {
       name           = "node-group-1"
-      instance_types = ["c7i-flex.large"]  # t3.medium: cost-effective for demos; use c5.large for production workloads
+      instance_types = ["c7i-flex.large"] 
 
       min_size     = 1
       max_size     = 2

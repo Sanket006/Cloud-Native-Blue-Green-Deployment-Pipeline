@@ -8,7 +8,7 @@ This guide walks you through deploying the Blue-Green demo to AWS using a real E
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Terraform | ≥ 1.5 | Provision AWS infrastructure |
+| Terraform | ≥ 1.7 | Provision AWS infrastructure |
 | AWS CLI | ≥ 2.x | AWS authentication; configure with `aws configure` |
 | Docker | Latest | Build and push container images |
 | kubectl | Latest | Apply Kubernetes manifests to EKS |
@@ -49,7 +49,7 @@ The Terraform configuration in `terraform/` will create:
 |----------|---------|
 | **VPC** | 10.0.0.0/16 with 2 public + 2 private subnets across 2 AZs |
 | **NAT Gateway** | Single NAT for private subnet internet access |
-| **EKS Cluster** | Kubernetes 1.30, public endpoint enabled |
+| **EKS Cluster** | Kubernetes 1.31, public endpoint enabled |
 | **Node Group** | 2× `t3.medium` on-demand instances (AL2 x86_64) |
 | **ECR Repository** | Private registry for blue/green Docker images |
 

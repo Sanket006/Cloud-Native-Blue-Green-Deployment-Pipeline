@@ -26,7 +26,7 @@ docker build -t devops-demo/bg-app:green ./app
 # Load images into your local cluster if needed.
 # Un-comment ONE of the lines below depending on which tool you use:
 # kind (created with kind-config.yaml):
-kind load docker-image devops-demo/bg-app:blue devops-demo/bg-app:green --name mycluster
+# kind load docker-image devops-demo/bg-app:blue devops-demo/bg-app:green --name mycluster
 # minikube:
 # minikube image load devops-demo/bg-app:blue devops-demo/bg-app:green
 
