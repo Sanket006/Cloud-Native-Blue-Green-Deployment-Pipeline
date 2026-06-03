@@ -47,7 +47,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
 
 
@@ -56,12 +56,10 @@ jobs:
           EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          CLUSTER_NAME="${EKS_CLUSTER_NAME:-bg-devops-cluster}"
-          REGION_NAME="${AWS_REGION:-us-east-1}"
-          
           aws eks update-kubeconfig \
-            --region "$REGION_NAME" \
-            --name "$CLUSTER_NAME"
+            --region "$AWS_REGION" \
+            --name "$EKS_CLUSTER_NAME"
+
 
 
 
