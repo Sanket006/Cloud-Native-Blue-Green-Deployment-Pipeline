@@ -142,6 +142,16 @@ Open your browser: **http://localhost:8080**
 
 You will see a **blue** background with `v1.0 (BLUE)`. The page auto-refreshes every **2 seconds** and shows which pod is serving the request.
 
+#### Demonstration Output:
+
+<table>
+  <tr>
+    <td align="center"><b>Blue Version (Active)</b><br><img src="blue-version.png" alt="Blue Environment Output" width="380"></td>
+    <td align="center"><b>Green Version (Idle)</b><br><img src="green-version.png" alt="Green Environment Output" width="380"></td>
+  </tr>
+</table>
+
+
 > **Tip — skip port-forward with kind:** If you created the cluster using `kind-config.yaml`, NodePort `30080` is already mapped to your machine. Open **http://localhost:30080** directly — no `port-forward` command needed.
 
 > **Note for `switch-traffic.sh` users:** After switching traffic, the old `port-forward` stays pinned to its original pod. Run the command printed by `switch-traffic.sh` in a new terminal to reconnect to the correct pod.
