@@ -55,16 +55,9 @@ jobs:
         env:
           TARGET_ENV: ${{ github.event.inputs.target_env }}
         run: |
-          echo "Requested traffic switch to: $TARGET_ENV"
-          echo ""
-          echo "⚠️  DRY RUN — no changes have been made to the cluster."
-          echo "    The kubectl patch command below is commented out."
-          echo "    To activate: add a KUBECONFIG secret and uncomment the steps above."
-          echo ""
-          echo "    Command that would run:"
-          echo "    kubectl patch service bg-demo-service \\"
-          echo "      -p '{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}'"
-          # Uncomment the lines below once the kubeconfig is configured:
+          echo "🚀 Actively switching traffic to environment: $TARGET_ENV"
           kubectl patch service bg-demo-service \
             -p "{\"spec\":{\"selector\":{\"app\":\"demo-app\",\"version\":\"$TARGET_ENV\"}}}"
+          echo "✅ Traffic routing updated successfully."
+
 
