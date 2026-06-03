@@ -49,7 +49,7 @@ The Terraform configuration in `terraform/` will create:
 |----------|---------|
 | **VPC** | 10.0.0.0/16 with 2 public + 2 private subnets across 2 AZs |
 | **NAT Gateway** | Single NAT for private subnet internet access |
-| **EKS Cluster** | Kubernetes 1.35, public endpoint enabled |
+| **EKS Cluster** | Kubernetes 1.31, public endpoint enabled |
 | **Node Group** | 2× `c7i-flex.large` on-demand instances (AL2023) |
 | **ECR Repository** | Private registry for blue/green Docker images |
 
