@@ -4,6 +4,20 @@ This guide walks you through deploying the Blue-Green demo to AWS using a real E
 
 ---
 
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Step 0 (Optional): Bootstrap Remote Terraform State](#step-0-optional-bootstrap-remote-terraform-state)
+3. [Step 1: Provision Infrastructure with Terraform](#step-1-provision-infrastructure-with-terraform)
+4. [Step 2: Deploy the Application to AWS](#step-2-deploy-the-application-to-aws)
+   - [Network Access Note](#network-access-note)
+5. [Step 3: Switch Traffic](#step-3-switch-traffic)
+6. [Step 4: Teardown — Avoid Ongoing AWS Costs](#step-4-teardown--avoid-ongoing-aws-costs)
+7. [Automating with Jenkins CI/CD](#automating-with-jenkins-cicd)
+8. [Related Documentation](#-related-documentation)
+
+---
+
 ## Prerequisites
 
 | Tool | Version | Purpose |

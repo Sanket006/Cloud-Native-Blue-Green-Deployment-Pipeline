@@ -4,6 +4,32 @@
 
 ---
 
+## Table of Contents
+
+1. [What is Blue-Green Deployment?](#what-is-blue-green-deployment)
+2. [Prerequisites](#prerequisites)
+   - [For Local Testing](#for-local-testing-minikube--kind--docker-desktop-k8s)
+   - [For AWS Deployment](#for-aws-deployment)
+3. [Quick Start — Local Demo](#quick-start--local-demo)
+   - [Step 1: Make Scripts Executable](#step-1-make-scripts-executable)
+   - [Step 2: Start Your Local Cluster](#step-2-start-your-local-cluster)
+   - [Step 3: Deploy Blue and Green Environments](#step-3-deploy-blue-and-green-environments)
+   - [Step 4: Access the Application](#step-4-access-the-application)
+   - [Step 5: Switch Traffic — Zero Downtime!](#step-5-switch-traffic--zero-downtime)
+4. [How Traffic Switching Works](#how-traffic-switching-works)
+5. [Deploying to AWS (EKS + ECR)](#deploying-to-aws-eks--ecr)
+6. [CI/CD Pipelines](#cicd-pipelines)
+   - [Jenkins — Local](#jenkins--local-jenkinslocaljenkinsfile)
+   - [Jenkins — AWS](#jenkins--aws-jenkinsawsjenkinsfile)
+   - [GitHub Actions — CI/CD](#github-actions--cicd-ciyml-blue-green-cdyml-terraform-provisionyml)
+7. [Key Concepts Demonstrated](#key-concepts-demonstrated)
+8. [Cleanup](#cleanup)
+   - [Local](#local)
+   - [AWS](#aws)
+9. [Related Documentation](#-related-documentation)
+
+---
+
 ## What is Blue-Green Deployment?
 
 Blue-Green deployment reduces downtime and release risk by running two identical production environments called **Blue** and **Green**.
